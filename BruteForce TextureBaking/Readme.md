@@ -1,6 +1,6 @@
 # BruteForce TextureBaking
 
-This tutorial will explain the benefits of building shader trees in you default rendering application and also what problems can arise due to that (moirée, roughness variation, performance hit). Following a solution is provided with custom MEL scripts to streamline the process.
+This [tutorial](https://www.youtube.com/watch?v=C__2GQaTtcs) will explain the benefits of building shader trees in you default rendering application and also what problems can arise due to that (moirée, roughness variation, performance hit). Following a solution is provided with custom MEL scripts to streamline the process.
 
 
 To add the scripts, open the Script Editor and paste the content of the Script, select all and MMB+Drag to the shelf.
