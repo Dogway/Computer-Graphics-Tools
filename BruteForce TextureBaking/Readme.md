@@ -19,3 +19,5 @@ Now you can add a name and icons as depicted below if you wish:
 **Separate by UV Shells.mel**
 
         Detach_by_UV_Seams_icon.png (add to prefs/icons folder)
+
+![Cover](https://github.com/Dogway/Computer-Graphics-Tools/blob/master/BruteForce%20TextureBaking/BruteForce%20TextureBaking%20-%20Bake%20Textures%20Cover.png)
