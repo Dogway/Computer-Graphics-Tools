@@ -1,0 +1,140 @@
+// by Jose Linares
+// This script works in conjunction with the MESH to UV script
+// Said script flattens the Mesh into UV grid coordinates
+// And this script adjusts the front camera settings depending on UDIM Tile Patches and Render Resolution
+
+{
+if(`window -exists UDIMcam`) deleteUI -window UDIMcam;
+
+int $WinWidth = 400;
+
+
+string $myWindow = `window -title "Brute-Force Texture Bake Setup"
+		-width $WinWidth
+		-height 300
+		-sizeable 0
+		UDIMcam`;
+
+				columnLayout -width $WinWidth -cw $WinWidth -adjustableColumn true;
+				frameLayout -label "UDIM Tile Resolution";
+				rowLayout -numberOfColumns 4;
+
+					string $radiocol = `radioCollection`;
+						// add some radio buttons to the collection
+						radioButton 	-label "1K" K1;
+						radioButton 	-label "2K" K2;
+						radioButton -sl -label "4K" K4;
+						radioButton 	-label "8K" K8;
+
+						setParent ..;
+					setParent ..;
+
+
+
+					frameLayout -label "UDIM Tile (U Dimension)";
+					columnLayout -cal "left";
+						
+						// add an int slider
+					intSliderGrp -label "Tile#" -field true -cw2 40 200 -minValue 1 -maxValue 10 -value 1
+					Slider1;
+
+						setParent ..;
+					setParent ..;
+
+					frameLayout -label "UDIM Tile (V Dimension)";
+					columnLayout -cal "left";
+						
+						// add an int slider
+					intSliderGrp -label "Tile#" -field true -cw2 40 200 -minValue 1 -maxValue 10 -value 1
+					Slider2;
+
+						setParent ..;
+					setParent ..;
+
+
+					frameLayout -label "UDIM Tile Range (U Dimension)";
+					columnLayout -cal "left";
+						
+						// add an int slider
+					intSliderGrp -label "Tiles" -field true -cw2 40 200 -minValue 1 -maxValue 10 -value 1
+					Slider3;
+
+						setParent ..;
+					setParent ..;
+
+
+
+					rowLayout -numberOfColumns 2;
+
+					button -width 90 -label "Apply" -command "Execute()";
+					button -width 90 -label "Cancel" -command "deleteUI -window UDIMcam";
+
+						setParent ..;
+					setParent ..;
+
+
+			showWindow;
+
+proc Execute() {
+
+	int $Resolution = `radioButton -q -sl K1`;
+	if ($Resolution == 1){
+	int $ResH = 1024 ;
+	int $ResW = `intSliderGrp -query -value Slider3` * $ResH ;
+	setAttr "defaultResolution.width" $ResW;
+	setAttr "defaultResolution.height" $ResH;
+		}
+	int $Resolution = `radioButton -q -sl K2`;
+	if ($Resolution == 1){
+	int $ResH = 2048 ;
+	int $ResW = `intSliderGrp -query -value Slider3` * $ResH ;
+	setAttr "defaultResolution.width" $ResW;
+	setAttr "defaultResolution.height" $ResH;
+		}
+	int $Resolution = `radioButton -q -sl K4`;
+	if ($Resolution == 1){
+	int $ResH = 4096 ;
+	int $ResW = `intSliderGrp -query -value Slider3` * $ResH ;
+	setAttr "defaultResolution.width" $ResW;
+	setAttr "defaultResolution.height" $ResH;
+		}
+	int $Resolution = `radioButton -q -sl K8`;
+	if ($Resolution == 1){
+	int $ResH = 8192 ;
+	int $ResW = `intSliderGrp -query -value Slider3` * $ResH ;
+	setAttr "defaultResolution.width" $ResW;
+	setAttr "defaultResolution.height" $ResH;
+		}
+
+int $UDIMU = `intSliderGrp -query -value Slider1`;
+int $UDIMV = `intSliderGrp -query -value Slider2`;
+int $UDIMR = `intSliderGrp -query -value Slider3`;
+
+int $UDIMOffset= ($UDIMU - 1) * 10 ;
+int $CamTransX = ($UDIMR * 5) + $UDIMOffset  ;
+int $CamTransY = ($UDIMV * 10) - 5 ;
+int $CamOrthoW = $UDIMR * 10;
+float $OScan   = 1.0;
+
+if ($UDIMR < 5) {
+	setAttr "frontShape.overscan" (4.0 / $UDIMR);
+} else {
+	setAttr "frontShape.overscan" $OScan;
+}
+
+setAttr "front.translateZ" 1; //fixed
+setAttr "front.translateX" $CamTransX;
+setAttr "front.translateY" $CamTransY;
+
+setAttr "frontShape.displayResolution" 1;
+setAttr "frontShape.orthographic" 1; //fixed
+setAttr "frontShape.orthographicWidth" $CamOrthoW;
+
+setAttr "defaultResolution.aspectLock" 0;
+setAttr "defaultResolution.deviceAspectRatio" $UDIMR;
+setAttr "defaultResolution.pixelAspect" $UDIMR;
+
+lookThroughModelPanel front modelPanel1;
+refresh;
+	}
+} 

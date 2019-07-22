@@ -1,0 +1,75 @@
+// Unfold MESH by its UV - by Nyro (https://forums.cgsociety.org/t/how-to-flatten-polygon-geometry-in-maya/1544246/6)
+// Adapted for Multiple Objects by Jose Linares
+// (The original works FINE for multi UVs in single mesh, but not on Multiple Objects)
+// I recommend you to previously Separate mesh by UV seams script so you
+// can apply different SurfaceShaders to each mesh for baking.
+
+
+string $thisSelection[] = `ls -sl`;
+
+for ($thisObject in $thisSelection) {
+UVtoMesh1($thisObject);
+}
+
+proc UVtoMesh1(string $thisObject) {
+
+global string $gMainProgressBar;
+progressBar -e -bp -ii 1 -st "Preparing for UV Layout Adaptation..." $gMainProgressBar;
+
+// convert to UVs
+ConvertSelectionToUVs;
+
+//convert to Shell Border
+polySelectConstraint -t 0x0010 -w 1 -m 2;
+
+// reset select Constraint
+polySelectConstraint -m 0;
+
+//split associated Edges;
+polyListComponentConversion -tv;
+polySplitVertex $thisObject;
+
+// reselect all vertices
+int $vertexCount[] = `polyEvaluate -v $thisObject`;
+select -r ($thisObject + ".vtx[0:" + $vertexCount[0] + "]");
+string $vertices[] = `ls -sl -fl`;
+
+
+
+// set scale multiplier here
+float $multiplier = 10;
+
+string $vertex;
+
+progressBar -e -bp -ii 1 -st "Adapting to UV layout" -max `size($vertices)` $gMainProgressBar;
+
+for ($vertex in $vertices) {
+    if(`progressBar -q -ic $gMainProgressBar`) { break; }
+    
+    progressBar -e -step 1 $gMainProgressBar;
+
+	select $vertex;
+	$uv = `polyListComponentConversion -tuv $vertex`;
+	select $uv;
+	float $pos[] = `polyEditUV -q -vValue $uv`;
+	$pos[0] *= $multiplier;
+
+	$pos[1] *= $multiplier;
+
+	select $vertex;
+	xform -ws -a -t $pos[0] $pos[1] 0.0 $vertex;
+};
+
+progressBar -e -ep $gMainProgressBar;
+
+select -r $thisObject;
+changeSelectMode -object;
+DeleteHistory;
+
+// merge vertices after remapping. Depening on geometry and UV Layout, may create non-manifold geometry.
+// If you encounter a mess of non-manifold geometry as a result, delete the final “polyMergeVertex” command.
+// polyMergeVertex  -d 0.001 -ch 1 -tx 0 $thisObject;
+
+print "Phew!";
+
+}
