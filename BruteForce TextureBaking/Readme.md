@@ -6,7 +6,7 @@ This [tutorial](https://www.youtube.com/watch?v=C__2GQaTtcs) will explain the be
 To add the scripts, open the Script Editor and paste the content of the Script, select all and MMB+Drag to the shelf.
 Now you can add a name and icons as depicted below if you wish:
 
-**Unfold MESH mod.mel:**
+**Unfold MESH mod.mel (Nyro's script mod):**
 
         growUVSelection.png
 	
