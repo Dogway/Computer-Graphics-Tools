@@ -572,6 +572,9 @@ class WAZOU_PIE_MENUS_MT_apply_clear_transforms(Menu):
         row.separator()
         row = col.row(align=True)
         row.scale_y = 1.3
+        row.operator("object.apply_all_delta", text="Apply All Delta", icon='EMPTY_AXIS')
+        row = col.row(align=True)
+        row.scale_y = 1.3
         row.operator("object.location_clear", text="Clear Location", icon='EMPTY_AXIS')
         row = col.row(align=True)
         row.scale_y = 1.3
@@ -586,6 +589,9 @@ class WAZOU_PIE_MENUS_MT_apply_clear_transforms(Menu):
         #3 - BOTTOM - RIGHT
         split = pie.split()
         col = split.column(align=True)
+        row = col.row(align=True)
+        row.scale_y = 1.3
+        row.operator("object.convert", text="Apply Visual Geometry to Mesh", icon='FILE_TICK').target='MESH'
         row = col.row(align=True)
         row.scale_y = 1.3
         row.operator("object.visual_transform_apply", text="Apply Visual Transforms", icon='FILE_TICK')
@@ -625,6 +631,9 @@ class WAZOU_PIE_MENUS_MT_origin_pivot(Menu):
         # 1 - BOTTOM - LEFT
         split = pie.split()
         col = split.column(align=True)
+        row = col.row(align=True)
+        row.scale_y = 1.3
+        row.operator("object.origin_to_selected", text="O to Active", icon='PIVOT_BOUNDBOX')
         row = col.row(align=True)
         row.scale_y = 1.3
         row.operator("wazou_pie_menus.pivot_to_bottom", text="O to Bottom", icon='PIVOT_BOUNDBOX')
@@ -1621,7 +1630,7 @@ def register():
         try:
             bpy.utils.register_class(cls)
         except:
-            print(f"{cls.__name__} already registred")
+            print(f"{cls.__name__} already registered")
 
 
 def unregister():

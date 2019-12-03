@@ -646,7 +646,8 @@ class PieSave(Menu):
 
         col.separator()
         col.operator("wm.recover_auto_save", text="Recover Auto Save...", icon_value=get_icon('recover_auto_save'))
-        # col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
+        col.operator("uoza.force_auto_save", text="Force Auto Save...", icon_value=get_icon('recover_auto_save'))
+#        col.operator("wm.recover_last_session", text="Recover Last Session", icon='RECOVER_LAST')
         col.operator("wm.revert_mainfile", text="Revert", icon_value=get_icon('revert'))
 
     def draw_center_column_top(self, col):
