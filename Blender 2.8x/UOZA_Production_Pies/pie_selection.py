@@ -23,7 +23,7 @@ bl_info = {
     "name": "UOZA - Selection Pie",
     "author": "Dogway, Wazou",
     "version": (1, 0, 0),
-    "blender": (2, 81, 0),
+    "blender": (2, 82, 0),
     "description": "Select Mode & Tools Pie Menu",
     "location": "3D View",
     "warning": "",
@@ -108,10 +108,12 @@ class UOZA_MT_selection_object_mode(Menu):
         else:
             pie.operator("object.select_all", text="Select/Deselect All", icon='RESTRICT_SELECT_OFF').action = 'SELECT'
         #1 - BOTTOM - LEFT
-        pie.operator("view3d.localview", text="Isolate", icon='CAMERA_DATA').frame_selected = False
+        pie.operator("uoza.isolate", text="Isolate", icon='CAMERA_DATA')
         #3 - BOTTOM - RIGHT
         split = pie.split()
         col = split.column(align=True)
+        row = col.row(align=True)
+        row.operator("uoza.select_camera", text="Select Camera", icon='CAMERA_DATA')
         row = col.row(align=True)
         row.operator("object.select_by_type", text="Select By Type", icon='SNAP_VOLUME')
         row = col.row(align=True)
