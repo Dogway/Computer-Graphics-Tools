@@ -101,12 +101,9 @@ class UOZA_MT_selection_object_mode(Menu):
         #8 - TOP
         pie.operator("uoza_selections.select_tools", text="Select", icon='RESTRICT_SELECT_OFF').select_tools = 'select'
         #7 - TOP - LEFT
-        pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
+        pie.operator("view3d.zoom_border", text="Box Zoom", icon='STICKY_UVS_LOC')
         #9 - TOP - RIGHT
-        if len(bpy.context.selected_objects) > 0:
-            pie.operator("object.select_all", text="Select/Deselect All", icon='RESTRICT_SELECT_OFF').action = 'DESELECT'
-        else:
-            pie.operator("object.select_all", text="Select/Deselect All", icon='RESTRICT_SELECT_OFF').action = 'SELECT'
+        pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
         #1 - BOTTOM - LEFT
         pie.operator("uoza.isolate", text="Isolate", icon='CAMERA_DATA')
         #3 - BOTTOM - RIGHT
