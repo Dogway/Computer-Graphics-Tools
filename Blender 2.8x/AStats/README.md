@@ -6,4 +6,4 @@ I rearranged and aligned the overlay so it's more organised.
 
  You can check the Diff in the [commits](https://github.com/Dogway/Computer-Graphics-Tools/commits/master)
 
-![](https://raw.githubusercontent.com/Dogway/Computer-Graphics-Tools/master/Blender 2.8x/AStats/Overlay.png)
+![](https://raw.githubusercontent.com/Dogway/Computer-Graphics-Tools/master/Blender%202.8x/AStats/Overlay.png)
