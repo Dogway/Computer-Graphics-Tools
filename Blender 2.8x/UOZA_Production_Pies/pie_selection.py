@@ -139,7 +139,11 @@ class UOZA_MT_selection_edit_mode(Menu):
         #6 - RIGHT
         pie.operator("uoza_selections.select_tools", text="Select Box", icon='STICKY_UVS_LOC').select_tools = 'select_box'
         #2 - BOTTOM
-        pie.operator(ob_type + ".select_all", text="Invert Selection", icon='ZOOM_PREVIOUS').action = 'INVERT'
+        print(ob_type)
+        if ob_type is not "":
+            pie.operator(ob_type + ".select_all", text="Invert Selection", icon='ZOOM_PREVIOUS').action = 'INVERT'
+        else:
+            pie.operator("view3d.noop", text="Invert Selection", icon='ZOOM_PREVIOUS')
         #8 - TOP
         pie.operator("uoza_selections.select_tools", text="Select", icon='RESTRICT_SELECT_OFF').select_tools = 'select'
         #7 - TOP - LEFT
@@ -150,15 +154,27 @@ class UOZA_MT_selection_edit_mode(Menu):
         row = col.row(align=True)
         row.operator("mesh.region_to_loop", text="Select Boundary Loop", icon='MESH_PLANE')
         row = col.row(align=True)
-        row.operator(ob_type + ".select_nth", text="Select Checker", icon='PARTICLE_POINT')
+        if ob_type is not "":
+            row.operator(ob_type + ".select_nth", text="Select Checker", icon='PARTICLE_POINT')
+        else:
+            row.operator("view3d.noop", text="Select Checker", icon='PARTICLE_POINT')
         row = col.row(align=True)
-        row.operator(ob_type + ".select_similar", text="Select Similar", icon='PIVOT_INDIVIDUAL')
+        if ob_type is not "":
+            row.operator(ob_type + ".select_similar", text="Select Similar", icon='PIVOT_INDIVIDUAL')
+        else:
+            row.operator("view3d.noop", text="Select Similar", icon='PIVOT_INDIVIDUAL')
         #9 - TOP - RIGHT
-        pie.operator(ob_type + ".select_all", text="Select All", icon='STICKY_UVS_LOC').action = 'SELECT'
+        pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
         #1 - BOTTOM - LEFT
-        pie.operator("mesh.loop_multi_select", text="Select Loop", icon='ZOOM_PREVIOUS').ring = False
+        if hasattr(bpy.ops, "SmartSelectLoop"):
+            pie.operator("mesh.smart_select_loop", text="Select Loop", icon='ZOOM_PREVIOUS')
+        else:
+            pie.operator("mesh.loop_multi_select", text="Select Loop", icon='ZOOM_PREVIOUS').ring = False
         #3 - BOTTOM - RIGHT
-        pie.operator("mesh.loop_multi_select", text="Select Ring", icon='ZOOM_PREVIOUS').ring = True
+        if hasattr(bpy.ops, "SmartSelectRing"):
+            pie.operator("mesh.smart_select_ring", text="Select Ring", icon='ZOOM_PREVIOUS')
+        else:
+            pie.operator("mesh.loop_multi_select", text="Select Ring", icon='ZOOM_PREVIOUS').ring = True
 
 
 addon_keymaps = []
