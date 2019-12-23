@@ -348,30 +348,41 @@ def draw_callback_px(self, context):
         globalStates = getGlobalStates()
         globalValues = getGlobalStats()
         size = relativeScale(getValue('gFontSize'))
-        if getValue('bDrawGlobalVerts'):
-            text = globalnames[0]+str(globalValues[0])
-            setDrawParams('gFontSize','gLocX','gLocY',0,size,'gStatColor',text,width,height,'right')
-            size+=relativeScale(getValue('gFontSize'))
-        if getValue('bDrawGlobalEdges'):
-            text = globalnames[1]+str(globalValues[1])
-            setDrawParams('gFontSize','gLocX','gLocY',0,size,'gStatColor',text,width,height,'right')
-            size+=relativeScale(getValue('gFontSize'))
-        if getValue('bDrawGlobalFaces'):
-            text = globalnames[3]+str(globalValues[3])
-            setDrawParams('gFontSize','gLocX','gLocY',0,size,'gStatColor',text,width,height,'right')
-            size+=relativeScale(getValue('gFontSize'))
+        #faces
         if getValue('bDrawGlobalObjects'):
-            text = globalnames[4]+str(globalValues[4])
-            setDrawParams('gFontSize','gLocX','gLocY',0,size,'gStatColor',text,width,height,'right')
-            size+=relativeScale(getValue('gFontSize'))
+            shiftY = 0
+            setDrawParams('gFontSize','gLocX','gLocY',0,-shiftY,'gStatColor',globalnames[4],width,height,'left')
+            shiftX = len(globalnames[4])*(relativeScale(getValue('gFontSize'))/2)
+            shiftX += relativeScale(getValue('gFontSize'))/3.0
+            setDrawParams('gFontSize','gLocX','gLocY',shiftX,-shiftY,'gStatColor',str(globalValues[4]),width,height,'left')
+        if getValue('bDrawGlobalFaces'):
+            shiftY += relativeScale(getValue('gFontSize'))*1.5
+            setDrawParams('gFontSize','gLocX','gLocY',0,-shiftY,'gStatColor',globalnames[3],width,height,'left')
+            shiftX = len(globalnames[3])*(relativeScale(getValue('gFontSize'))/2)
+            shiftX += relativeScale(getValue('gFontSize'))/1.5
+            setDrawParams('gFontSize','gLocX','gLocY',shiftX,-shiftY,'gStatColor',str(globalValues[3]),width,height,'left')
+        if getValue('bDrawGlobalEdges'):
+            shiftY += relativeScale(getValue('gFontSize'))*1.5
+            setDrawParams('gFontSize','gLocX','gLocY',0,-shiftY,'gStatColor',globalnames[1],width,height,'left')
+            shiftX = len(globalnames[1])*(relativeScale(getValue('gFontSize'))/2)
+            shiftX += relativeScale(getValue('gFontSize'))/1.5
+            setDrawParams('gFontSize','gLocX','gLocY',shiftX,-shiftY,'gStatColor',str(globalValues[1]),width,height,'left')
+        if getValue('bDrawGlobalVerts'):
+            shiftY += relativeScale(getValue('gFontSize'))*1.5
+            setDrawParams('gFontSize','gLocX','gLocY',0,-shiftY,'gStatColor',globalnames[0],width,height,'left')
+            shiftX = len(globalnames[0])*(relativeScale(getValue('gFontSize'))/2)
+            shiftX += relativeScale(getValue('gFontSize'))/1.5
+            setDrawParams('gFontSize','gLocX','gLocY',shiftX,-shiftY,'gStatColor',str(globalValues[0]),width,height,'left')
         if getValue('bDrawGlobalOrient'):
             text = globalStates[0]
-            setDrawParams('gFontSize','gLocX','gLocY',0,size,'globalStatesColor',text,width,height,'right')
-            size+=relativeScale(getValue('gFontSize'))
+            size += relativeScale(getValue('gFontSize'))*1.0
+            shiftY += relativeScale(getValue('gFontSize'))
+            setDrawParams('gFontSize','gLocX','gLocY',0,size,'globalStatesColor',text,width,height,'left')
         if getValue('bDrawGlobalPivot'):
             text = globalStates[1]
-            setDrawParams('gFontSize','gLocX','gLocY',0,size,'globalStatesColor',text,width,height,'right')
-            size+=relativeScale(getValue('gFontSize'))
+            size += relativeScale(getValue('gFontSize'))*1.5
+            shiftY += relativeScale(getValue('gFontSize'))
+            setDrawParams('gFontSize','gLocX','gLocY',0,size,'globalStatesColor',text,width,height,'left')
     #Draw stats for selected objects
     if getValue('bDispSelected') == True:
         totalComponents = getDataFromSelectedObjects()
@@ -380,39 +391,13 @@ def draw_callback_px(self, context):
         totalSelected = getSelectionStats()
         shiftX=0
         shiftY=0
-        #verts
-        if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[0] and getValue('bDrawVerts')) or (not getValue('bDispActive') and getValue('bDrawVerts')):
-            shiftY = relativeScale(getValue('sFontSize'))*1.5 
-            setDrawParams('sFontSize','sLocX','sLocY',0,-shiftY,'sStatColor',names[0],width,height,'left')
-            shiftX = len(names[0])*(relativeScale(getValue('sFontSize'))/2)
-            if bpy.context.mode == "EDIT_MESH":
-                if bpy.context.scene.tool_settings.mesh_select_mode[0]:
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'highlightColor',str(totalSelected[0]),width,height,'left')
-                    shiftX += len(str(totalSelected[0]))*(relativeScale(getValue('sFontSize'))/1.5)
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor','/',width,height,'left')
-                else :
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalSelected[0])+'/',width,height,'left')
-                    shiftX += len(str(totalSelected[0]))*(relativeScale(getValue('sFontSize'))/1.5)
-            shiftX += relativeScale(getValue('sFontSize'))/1.5
-            setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalComponents[0]),width,height,'left')
-        #edges
-        if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[1] and getValue('bDrawEdges')) or (not getValue('bDispActive') and getValue('bDrawEdges')):
-            shiftY += relativeScale(getValue('sFontSize'))*1.2
-            setDrawParams('sFontSize','sLocX','sLocY',0,-shiftY,'sStatColor',names[1],width,height,'left')
-            shiftX = len(names[1])*(relativeScale(getValue('sFontSize'))/2)
-            if bpy.context.mode == "EDIT_MESH":
-                if bpy.context.scene.tool_settings.mesh_select_mode[1]:
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'highlightColor',str(totalSelected[1]),width,height,'left')
-                    shiftX += len(str(totalSelected[1]))*(relativeScale(getValue('sFontSize'))/1.5)
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor','/',width,height)
-                else:
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalSelected[1])+'/',width,height,'left')
-                    shiftX += len(str(totalSelected[1]))*(relativeScale(getValue('sFontSize'))/1.5)
-            shiftX += relativeScale(getValue('sFontSize'))/1.5
-            setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalComponents[1]),width,height,'left')
+        if (getValue('bShowMats')):
+            
+            shiftY += relativeScale(getValue('sFontSize'))*2.0
+            setDrawParams('mFontSize','sLocX','sLocY',shiftX, shiftY,'matColor',getMaterialsFromSelection(),width,height,'left')
         #faces
         if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[2] and getValue('bDrawFaces')) or (not getValue('bDispActive') and getValue('bDrawFaces')):
-            shiftY += relativeScale(getValue('sFontSize'))*1.2
+            shiftY = relativeScale(getValue('sFontSize'))*1.5
             setDrawParams('sFontSize','sLocX','sLocY',0,-shiftY,'sStatColor',names[2],width,height,'left')
             shiftX = len(names[0])*(relativeScale(getValue('sFontSize'))/2)
             if bpy.context.mode == "EDIT_MESH":
@@ -425,26 +410,52 @@ def draw_callback_px(self, context):
                     shiftX += len(str(totalSelected[2]))*(relativeScale(getValue('sFontSize'))/1.5)
             shiftX += relativeScale(getValue('sFontSize'))/1.5
             setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalComponents[2]),width,height,'left')
-        #tris
-        if ((getValue('bDispActive')) and bpy.context.scene.tool_settings.mesh_select_mode[2] and getValue('bDrawTris')) or (not getValue('bDispActive') and getValue('bDrawTris')):
-            shiftY += relativeScale(getValue('sFontSize'))*1.2
-            setDrawParams('sFontSize','sLocX','sLocY',0,-shiftY,'sStatColor',names[3],width,height,'left')
+        #edges
+        if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[1] and getValue('bDrawVerts')) or (not getValue('bDispActive') and getValue('bDrawVerts')):
+            shiftY += relativeScale(getValue('sFontSize'))*1.5 
+            setDrawParams('sFontSize','sLocX','sLocY',0,-shiftY,'sStatColor',names[1],width,height,'left')
+            shiftX = len(names[1])*(relativeScale(getValue('sFontSize'))/2)
+            if bpy.context.mode == "EDIT_MESH":
+                if bpy.context.scene.tool_settings.mesh_select_mode[1]:
+                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'highlightColor',str(totalSelected[1]),width,height,'left')
+                    shiftX += len(str(totalSelected[1]))*(relativeScale(getValue('sFontSize'))/1.5)
+                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor','/',width,height)
+                else:
+                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalSelected[1])+'/',width,height,'left')
+                    shiftX += len(str(totalSelected[1]))*(relativeScale(getValue('sFontSize'))/1.5)
+            shiftX += relativeScale(getValue('sFontSize'))/1.5
+            setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalComponents[1]),width,height,'left')
+        #verts
+        if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[0] and getValue('bDrawVerts')) or (not getValue('bDispActive') and getValue('bDrawVerts')):
+            shiftY += relativeScale(getValue('sFontSize'))*1.5
+            setDrawParams('sFontSize','sLocX','sLocY',0,-shiftY,'sStatColor',names[0],width,height,'left')
             shiftX = len(names[0])*(relativeScale(getValue('sFontSize'))/2)
             if bpy.context.mode == "EDIT_MESH":
-                if bpy.context.scene.tool_settings.mesh_select_mode[2]:
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'highlightColor',str(totalSelected[3]),width,height,'left')
-                    shiftX += len(str(totalSelected[3]))*(relativeScale(getValue('sFontSize'))/1.5)
+                if bpy.context.scene.tool_settings.mesh_select_mode[0]:
+                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'highlightColor',str(totalSelected[0]),width,height,'left')
+                    shiftX += len(str(totalSelected[0]))*(relativeScale(getValue('sFontSize'))/1.5)
                     setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor','/',width,height,'left')
                 else:
-                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalSelected[3])+'/',width,height,'left')
-                    shiftX += len(str(totalSelected[3]))*(relativeScale(getValue('sFontSize'))/1.5)
+                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalSelected[0])+'/',width,height,'left')
+                    shiftX += len(str(totalSelected[0]))*(relativeScale(getValue('sFontSize'))/1.5)
             shiftX += relativeScale(getValue('sFontSize'))/1.5
-            setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalComponents[3]),width,height,'left')  
+            setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalComponents[0]),width,height,'left')
+        #tris
+#        if ((getValue('bDispActive')) and bpy.context.scene.tool_settings.mesh_select_mode[2] and getValue('bDrawTris')) or (not getValue('bDispActive') and getValue('bDrawTris')):
+#            shiftY += relativeScale(getValue('sFontSize'))*1.5
+#            setDrawParams('sFontSize','sLocX','sLocY',0,-shiftY,'sStatColor',names[3],width,height,'left')
+#            shiftX = len(names[0])*(relativeScale(getValue('sFontSize'))/2)
+#            if bpy.context.mode == "EDIT_MESH":
+#                if bpy.context.scene.tool_settings.mesh_select_mode[2]:
+#                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'highlightColor',str(totalSelected[3]),width,height,'left')
+#                    shiftX += len(str(totalSelected[3]))*(relativeScale(getValue('sFontSize'))/1.5)
+#                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor','/',width,height,'left')
+#                else:
+#                    setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalSelected[3])+'/',width,height,'left')
+#                    shiftX += len(str(totalSelected[3]))*(relativeScale(getValue('sFontSize'))/1.5)
+#            shiftX += relativeScale(getValue('sFontSize'))/1.5
+#            setDrawParams('sFontSize','sLocX','sLocY',shiftX,-shiftY,'sStatColor',str(totalComponents[3]),width,height,'left')  
         #mats
-        if (getValue('bShowMats')):
-            
-            shiftY += relativeScale(getValue('sFontSize'))*1.2
-            setDrawParams('mFontSize','sLocX','sLocY',0,-shiftY,'matColor',getMaterialsFromSelection(),width,height,'left')
 
 def register():
     bpy.utils.register_class(AddonPreferences)

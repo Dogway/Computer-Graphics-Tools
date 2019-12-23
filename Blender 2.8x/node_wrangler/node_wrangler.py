@@ -3125,7 +3125,7 @@ class NWAlignNodes(Operator, NWBase):
             if horizontal:
                 node.location.x = current_pos
                 current_pos += current_margin + node.dimensions.x
-                node.location.y = mid_y + (node.dimensions.y / 2)
+                node.location.y = max(y_locs)
             else:
                 node.location.y = current_pos
                 current_pos -= (current_margin * 0.3) + node.dimensions.y  # use half-margin for vertical alignment
