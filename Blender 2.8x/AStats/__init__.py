@@ -415,7 +415,13 @@ def draw_callback_px(self, context):
 		shiftY = relativeScale(getValue('sFontSize')) * 2.0
 		setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b, shiftY, 'sStatColor', str(objectName), width, height, 'left')
 
-		if (getValue('bShowMats')):
+		rendered = 0
+		for area in bpy.context.screen.areas:
+			if area.type == 'VIEW_3D':
+				for space in area.spaces:
+					if space.type == 'VIEW_3D' and space.shading.type == 'RENDERED':
+						rendered += 1
+		if (getValue('bShowMats')) and (bpy.context.mode == "OBJECT" or not rendered):
 			if getMaterialsFromSelection():
 				shiftX_m = int(((len(objectName)) * (relativeScale(getValue('gFontSize')))) / 1.5)
 				setDrawParams('mFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX_m, shiftY, 'matColor', "(" + getMaterialsFromSelection() + ")", width, height, 'left')
