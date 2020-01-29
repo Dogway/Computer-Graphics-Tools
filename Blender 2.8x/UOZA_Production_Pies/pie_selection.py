@@ -20,12 +20,12 @@
 
 
 bl_info = {
-    "name": "UOZA - Selection Pie",
+    "name": "UOZA - Smart Selection Pie",
     "author": "Dogway, Wazou",
     "version": (1, 0, 0),
     "blender": (2, 82, 0),
     "description": "Select Mode & Tools Pie Menu",
-    "location": "3D View",
+    "location": "View3D",
     "warning": "",
     "category": "3D View",
     "wiki_url": "https://blenderartists.org/t/uoza-production-pies-for-blender-2-8x"
@@ -67,33 +67,30 @@ class UOZA_OT_select_tools(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class UOZA_OT_view_selection(bpy.types.Operator):
-    """
-    CLICK - View Selected
-    SHIFT - View All"""
-    bl_idname = "uoza_pie_menus.view_selection"
-    bl_label = "View Selection"
+class UOZA_OT_select_boundary(bpy.types.Operator):
+    bl_idname = "uoza.select_boundary"
+    bl_label = "Select Boundary"
     bl_options = {'REGISTER'}
 
-    def invoke(self, context, event):
-        if event.shift:
-            bpy.ops.view3d.view_all()
-        else:
-            bpy.ops.view3d.view_selected()
-
+    def execute(self, context):
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_all()
+        bpy.ops.mesh.region_to_loop()
         return {'FINISHED'}
 
 
 class UOZA_MT_selection_object_mode(Menu):
     bl_idname = "UOZA_MT_selection_object_mode"
-    bl_label = "Uoza Selection Pie"
+    bl_label = "Uoza Smart Selection Pie"
     bl_context_mode = "OBJECT"
 
     def draw(self, context):
         layout = self.layout
+        space = bpy.context.space_data
+
         pie = layout.menu_pie()
         #4 - LEFT
-        pie.operator("uoza_selections.select_tools", text="Select Circle", icon='ANTIALIASED').select_tools = 'select_circle'
+        pie.operator("uoza.select_cast", text="Select Circle", icon='ANTIALIASED')
         #6 - RIGHT
         pie.operator("uoza_selections.select_tools", text="Select Box", icon='STICKY_UVS_LOC').select_tools = 'select_box'
         #2 - BOTTOM
@@ -105,16 +102,21 @@ class UOZA_MT_selection_object_mode(Menu):
         #9 - TOP - RIGHT
         pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
         #1 - BOTTOM - LEFT
-        pie.operator("uoza.isolate", text="Isolate", icon='CAMERA_DATA')
+        localview = space.local_view is not None
+        pie.operator("uoza.isolate", text="Isolate", icon='CAMERA_DATA', depress=localview)
         #3 - BOTTOM - RIGHT
         split = pie.split()
         col = split.column(align=True)
         row = col.row(align=True)
         row.operator("uoza.select_camera", text="Select Camera", icon='CAMERA_DATA')
         row = col.row(align=True)
+        row.operator("uoza.select_similar", text="Select Similar", icon='SNAP_VERTEX')
+        row = col.row(align=True)
         row.operator("object.select_by_type", text="Select By Type", icon='SNAP_VOLUME')
         row = col.row(align=True)
         row.operator("object.select_grouped", text="Select Grouped", icon='GROUP_VERTEX')
+        row = col.row(align=True)
+        row.operator("uoza.select_loose", text="Select Loose", icon='GROUP_VERTEX')
         row = col.row(align=True)
         row.operator("object.select_linked", text="Select Linked", icon='CONSTRAINT_BONE')
         row = col.row(align=True)
@@ -123,13 +125,13 @@ class UOZA_MT_selection_object_mode(Menu):
 
 class UOZA_MT_selection_edit_mode(Menu):
     bl_idname = "UOZA_MT_selection_edit_mode"
-    bl_label = "Uoza Selection Edit Pie"
+    bl_label = "Uoza Smart Selection Edit Pie"
     bl_context_mode = "EDIT_MESH"
 
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
-
+        space = bpy.context.space_data
         ob_type = ""
         for ob in bpy.context.selected_objects:
             ob_type = "curve" if ob.type == "CURVE" else "mesh"
@@ -139,7 +141,6 @@ class UOZA_MT_selection_edit_mode(Menu):
         #6 - RIGHT
         pie.operator("uoza_selections.select_tools", text="Select Box", icon='STICKY_UVS_LOC').select_tools = 'select_box'
         #2 - BOTTOM
-        print(ob_type)
         if ob_type is not "":
             pie.operator(ob_type + ".select_all", text="Invert Selection", icon='ZOOM_PREVIOUS').action = 'INVERT'
         else:
@@ -152,7 +153,7 @@ class UOZA_MT_selection_edit_mode(Menu):
         row = col.row(align=True)
         row.operator("mesh.loop_to_region", text="Select Loop Inner Region", icon='FACESEL')
         row = col.row(align=True)
-        row.operator("mesh.region_to_loop", text="Select Boundary Loop", icon='MESH_PLANE')
+        row.operator("uoza.select_boundary", text="Select Boundary Loop", icon='MESH_PLANE')
         row = col.row(align=True)
         if ob_type is not "":
             row.operator(ob_type + ".select_nth", text="Select Checker", icon='PARTICLE_POINT')
@@ -163,55 +164,40 @@ class UOZA_MT_selection_edit_mode(Menu):
             row.operator(ob_type + ".select_similar", text="Select Similar", icon='PIVOT_INDIVIDUAL')
         else:
             row.operator("view3d.noop", text="Select Similar", icon='PIVOT_INDIVIDUAL')
+        row = col.row(align=True)
+        if ob_type is not "":
+            row.operator("uoza.select_rand", text="Select Random", icon='GROUP_VERTEX')
+        else:
+            row.operator("view3d.noop", text="Select Random", icon='GROUP_VERTEX')
+        row = col.row(align=True)
+        localview = space.local_view is not None
+        row.operator("uoza.isolate", text="Isolate", icon='CAMERA_DATA', depress=localview)
         #9 - TOP - RIGHT
         pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
         #1 - BOTTOM - LEFT
-        if hasattr(bpy.ops, "SmartSelectLoop"):
+        if "smart_select_loop" in dir(bpy.ops.mesh):
             pie.operator("mesh.smart_select_loop", text="Select Loop", icon='ZOOM_PREVIOUS')
         else:
             pie.operator("mesh.loop_multi_select", text="Select Loop", icon='ZOOM_PREVIOUS').ring = False
         #3 - BOTTOM - RIGHT
-        if hasattr(bpy.ops, "SmartSelectRing"):
+        if "smart_select_ring" in dir(bpy.ops.mesh):
             pie.operator("mesh.smart_select_ring", text="Select Ring", icon='ZOOM_PREVIOUS')
         else:
             pie.operator("mesh.loop_multi_select", text="Select Ring", icon='ZOOM_PREVIOUS').ring = True
 
 
-addon_keymaps = []
-
-
 def register():
     bpy.utils.register_class(UOZA_OT_select_tools)
-    bpy.utils.register_class(UOZA_OT_view_selection)
+    bpy.utils.register_class(UOZA_OT_select_boundary)
     bpy.utils.register_class(UOZA_MT_selection_object_mode)
     bpy.utils.register_class(UOZA_MT_selection_edit_mode)
-
-    wm = bpy.context.window_manager
-    if wm.keyconfigs.addon:
-
-        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'C', 'PRESS')
-        kmi.properties.name = "UOZA_MT_selection_object_mode"
-        addon_keymaps.append((km, kmi))
-
-        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D', region_type='WINDOW')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'C', 'PRESS')
-        kmi.properties.name = "UOZA_MT_selection_edit_mode"
-        addon_keymaps.append((km, kmi))
 
 
 def unregister():
     bpy.utils.unregister_class(UOZA_OT_select_tools)
-    bpy.utils.unregister_class(UOZA_OT_view_selection)
+    bpy.utils.unregister_class(UOZA_OT_select_boundary)
     bpy.utils.unregister_class(UOZA_MT_selection_object_mode)
     bpy.utils.unregister_class(UOZA_MT_selection_edit_mode)
-
-    wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
-    if kc:
-        for km, kmi in addon_keymaps:
-            km.keymap_items.remove(kmi)
-    addon_keymaps.clear()
 
 
 if __name__ == "__main__":
