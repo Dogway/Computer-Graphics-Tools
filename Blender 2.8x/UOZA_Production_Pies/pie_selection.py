@@ -114,7 +114,10 @@ class UOZA_MT_selection_object_mode(Menu):
 class UOZA_MT_selection_edit_mode(Menu):
     bl_idname = "UOZA_MT_selection_edit_mode"
     bl_label = "Uoza Smart Selection Edit Pie"
-    bl_context_mode = "EDIT_MESH"
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.type == 'VIEW_3D' and context.region.type == 'WINDOW'
 
     def draw(self, context):
         layout = self.layout
