@@ -262,29 +262,35 @@ def getSelectionStats():
 	edges = 0
 	verts = 0
 	bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
-	if bpy.context.scene.tool_settings.mesh_select_mode[0] == True:
-		if bpy.context.mode == "EDIT_MESH":
-			verts = bStat[1].split(':')[1].split("/")[0]
-			edges = bStat[2].split(':')[1].split("/")[0]
-			faces = bStat[3].split(':')[1].split("/")[0]
-	if bpy.context.scene.tool_settings.mesh_select_mode[1] == True:
-		if bpy.context.mode == "EDIT_MESH":
-			verts = bStat[1].split(':')[1].split("/")[0]
-			edges = bStat[2].split(':')[1].split("/")[0]
-			faces = bStat[3].split(':')[1].split("/")[0]
-	if bpy.context.scene.tool_settings.mesh_select_mode[2] == True:
-		if bpy.context.mode == "EDIT_MESH":
-			verts = bStat[1].split(':')[1].split("/")[0]
-			edges = bStat[2].split(':')[1].split("/")[0]
-			faces = bStat[3].split(':')[1].split("/")[0]
-			if getValue('bDrawTris'):
-				for obj in bpy.context.selected_objects:
-					if obj.type == "MESH" and bpy.context.mode == "EDIT_MESH":
-						tris += getTriCount(obj)
+	modes = ["EDIT_LATTICE", "EDIT_CURVE", "EDIT_TEXT"]
+	if bpy.context.mode in modes:
+		verts = bStat[1].split(':')[1].split("/")[0]
+	else:
+		if bpy.context.scene.tool_settings.mesh_select_mode[0] == True:
+			if bpy.context.mode == "EDIT_MESH":
+				verts = bStat[1].split(':')[1].split("/")[0]
+				edges = bStat[2].split(':')[1].split("/")[0]
+				faces = bStat[3].split(':')[1].split("/")[0]
+		if bpy.context.scene.tool_settings.mesh_select_mode[1] == True:
+			if bpy.context.mode == "EDIT_MESH":
+				verts = bStat[1].split(':')[1].split("/")[0]
+				edges = bStat[2].split(':')[1].split("/")[0]
+				faces = bStat[3].split(':')[1].split("/")[0]
+		if bpy.context.scene.tool_settings.mesh_select_mode[2] == True:
+			if bpy.context.mode == "EDIT_MESH":
+				verts = bStat[1].split(':')[1].split("/")[0]
+				edges = bStat[2].split(':')[1].split("/")[0]
+				faces = bStat[3].split(':')[1].split("/")[0]
+				if getValue('bDrawTris'):
+					for obj in bpy.context.selected_objects:
+						if obj.type == "MESH" and bpy.context.mode == "EDIT_MESH":
+							tris += getTriCount(obj)
 	return [verts, edges, faces, tris]
 
 
 def getGlobalStats():
+
+	bad_type = ["LATTICE", "CURVE", "FONT"]
 	stats = [0, 0, 0, 0, 0, 0, 0]
 	stats[4] = len(bpy.context.visible_objects)
 	if bpy.context.mode == "OBJECT":
@@ -297,11 +303,18 @@ def getGlobalStats():
 				stats[1] += len(object.data.edges)
 		stats[2] = bStat[4].split(":")[1]
 		stats[3] = bStat[3].split(":")[1]
+	elif bpy.context.object.type in bad_type:
+		for object in bpy.context.visible_objects:
+			if object.type == "MESH":
+				bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
+				stats[6] = bStat[3]
+				stats[5] = bStat[2].split(':')[1].split("/")[0]
+				stats[0] = bStat[1].split(':')[1].split("/")[0]
 	else:
 		for object in bpy.context.visible_objects:
 			if object.type == "MESH":
 				bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
-				stats[6] = bStat[7]
+				stats[6] = bStat[6]
 				stats[5] = bStat[5].split(':')[1].split("/")[0]
 				stats[3] += len(object.data.polygons)
 				stats[1] += len(object.data.edges)
@@ -476,7 +489,7 @@ def draw_callback_px(self, context):
 				shiftY += relativeScale(getValue('sFontSize')) * 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b, shiftY, 'sStatColor', names[0], width, height, 'left')
 				shiftX = len(names[0]) * (relativeScale(getValue('sFontSize')) / 2)
-				if bpy.context.mode == "EDIT_MESH":
+				if bpy.context.mode == "EDIT_MESH" or bpy.context.mode in ["EDIT_LATTICE", "EDIT_CURVE", "EDIT_TEXT"]:
 					if bpy.context.scene.tool_settings.mesh_select_mode[0]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[0]), width, height, 'left')
 						shiftX += len(str(totalSelected[0])) * (relativeScale(getValue('sFontSize')) / 1.5)
