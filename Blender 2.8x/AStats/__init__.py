@@ -45,7 +45,7 @@ objectName = ""
 totalComponents = [0, 0, 0, 0]
 totalSelected = [0, 0, 0, 0]
 names = ["Verts : ", "Edges : ", "Faces : ", "Tris : "]
-globalnames = ["Verts :", "Edges :", "Tris :", "Faces :", "Objects :", "Memory :"]
+globalnames = ["Verts :", "Edges :", "Tris :", "Faces :", "Objects :", "Memory :", "Version :"]
 globalValues = [0, 0, 0, 0]
 globalStates = []
 
@@ -73,6 +73,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	globalStatesColor: bpy.props.FloatVectorProperty(name="States", description="State Color", default=(0.5, 0.5, 0.5), subtype='COLOR')
 	#Switches
 	bDispGlobal: bpy.props.BoolProperty(name="On/Off", description="On/Off switch", default=True)
+	bDrawGlobalVer: bpy.props.BoolProperty(name="Version", description="Switch for drawing Version", default=True)
 	bDrawGlobalMem: bpy.props.BoolProperty(name="Memory", description="Switch for drawing Memory", default=True)
 	bDrawGlobalVerts: bpy.props.BoolProperty(name="Verts", description="Switch for calculating vertices", default=True)
 	bDrawGlobalEdges: bpy.props.BoolProperty(name="Edges", description="Switch for calculating edges", default=True)
@@ -156,6 +157,7 @@ class AStats_Switches(bpy.types.Panel):
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalEdges')
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalVerts')
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalMem')
+		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalVer')
 		#selected box
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDispSelected', icon='FORCE_CHARGE')
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bShowMats')
@@ -283,10 +285,11 @@ def getSelectionStats():
 
 
 def getGlobalStats():
-	stats = [0, 0, 0, 0, 0, 0]
+	stats = [0, 0, 0, 0, 0, 0, 0]
 	stats[4] = len(bpy.context.visible_objects)
 	if bpy.context.mode == "OBJECT":
 		bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
+		stats[6] = bStat[7]
 		stats[5] = bStat[6].split(':')[1].split("/")[0]
 		stats[0] = bStat[2].split(":")[1]
 		for object in bpy.context.visible_objects:
@@ -298,6 +301,7 @@ def getGlobalStats():
 		for object in bpy.context.visible_objects:
 			if object.type == "MESH":
 				bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
+				stats[6] = bStat[7]
 				stats[5] = bStat[5].split(':')[1].split("/")[0]
 				stats[3] += len(object.data.polygons)
 				stats[1] += len(object.data.edges)
@@ -410,6 +414,12 @@ def draw_callback_px(self, context):
 				shiftX = len(globalnames[5]) * (relativeScale(getValue('gFontSize')) / 2)
 				shiftX += relativeScale(getValue('gFontSize')) / 1.5
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftY, 'gStatColor', str(globalValues[5]), width, height, 'left')
+			if getValue('bDrawGlobalVer'):
+				shiftY += relativeScale(getValue('gFontSize')) * 2.0
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'gStatColor', globalnames[6], width, height, 'left')
+				shiftX = len(globalnames[6]) * (relativeScale(getValue('gFontSize')) / 2)
+				shiftX += relativeScale(getValue('gFontSize')) / 1.5
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftY, 'gStatColor', str(globalValues[6]), width, height, 'left')
 
 		#Draw stats for selected objects
 		if getValue('bDispSelected') == True:
