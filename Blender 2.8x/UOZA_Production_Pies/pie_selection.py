@@ -95,20 +95,25 @@ class UOZA_MT_selection_object_mode(Menu):
         #3 - BOTTOM - RIGHT
         split = pie.split()
         col = split.column(align=True)
+        gap = col.column()
+        gap.separator()
+        gap.scale_y = 4
         row = col.row(align=True)
         row.operator("uoza.select_camera", text="Select Camera", icon='CAMERA_DATA')
         row = col.row(align=True)
+        row.operator("uoza.select_nodes", text="Select Material Nodes", icon='MATERIAL')
+        row = col.row(align=True)
         row.operator("uoza.select_similar", text="Select Similar", icon='SNAP_VERTEX')
+        row = col.row(align=True)
+        row.operator("object.select_random", text="Select Random", icon='GROUP_VERTEX')
+        row = col.row(align=True)
+        row.operator("uoza.select_loose", text="Select Loose", icon='GROUP_VERTEX')
         row = col.row(align=True)
         row.operator("object.select_by_type", text="Select By Type", icon='SNAP_VOLUME')
         row = col.row(align=True)
         row.operator("object.select_grouped", text="Select Grouped", icon='GROUP_VERTEX')
         row = col.row(align=True)
-        row.operator("uoza.select_loose", text="Select Loose", icon='GROUP_VERTEX')
-        row = col.row(align=True)
         row.operator("object.select_linked", text="Select Linked", icon='CONSTRAINT_BONE')
-        row = col.row(align=True)
-        row.operator("object.select_random", text="Select Random", icon='GROUP_VERTEX')
 
 
 class UOZA_MT_selection_edit_mode(Menu):
@@ -166,6 +171,10 @@ class UOZA_MT_selection_edit_mode(Menu):
         row = col.row(align=True)
         vis = next((True for i in act.data.vertices if i.hide == True), False)
         row.operator("uoza.isolate", text="Isolate", icon='CAMERA_DATA', depress=vis)
+        gap = col.column()
+        gap.separator()
+        gap.scale_y = 4
+
         #9 - TOP - RIGHT
         pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
         #1 - BOTTOM - LEFT
