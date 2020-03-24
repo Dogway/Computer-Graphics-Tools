@@ -23,7 +23,7 @@ bl_info = {
 	"description": "Show Stats in Viewport",
 	"author": "A*, Zuorion, Dogway",
 	"version": (0, 0, 5),
-	"blender": (2, 80, 0),
+	"blender": (2, 83, 0),
 	"location": "View3D",
 	"wiki_url": "https://youtu.be/6Ra_2eng3XE",
 	"category": "3D View"
@@ -31,6 +31,7 @@ bl_info = {
 
 # For Selected Count, it heats CPU (10% load) and GPU, because the draw is running constantly.
 
+import os.path
 import bpy
 import blf
 import bmesh
@@ -75,6 +76,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	bDispGlobal: bpy.props.BoolProperty(name="On/Off", description="On/Off switch", default=True)
 	bDrawGlobalVer: bpy.props.BoolProperty(name="Version", description="Switch for drawing Version", default=True)
 	bDrawGlobalMem: bpy.props.BoolProperty(name="Memory", description="Switch for drawing Memory", default=True)
+	bDrawGlobalFlname: bpy.props.BoolProperty(name="Filename", description="Switch for drawing File Name", default=True)
 	bDrawGlobalVerts: bpy.props.BoolProperty(name="Verts", description="Switch for calculating vertices", default=True)
 	bDrawGlobalEdges: bpy.props.BoolProperty(name="Edges", description="Switch for calculating edges", default=True)
 	bDrawGlobalFaces: bpy.props.BoolProperty(name="Faces", description="Switch for calculating faces", default=True)
@@ -157,6 +159,7 @@ class AStats_Switches(bpy.types.Panel):
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalEdges')
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalVerts')
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalMem')
+		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalFlname')
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalVer')
 		#selected box
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDispSelected', icon='FORCE_CHARGE')
@@ -220,6 +223,8 @@ def setDrawParams(fontName, xName, yName, shiftX, shiftY, colorName, text, width
 
 def getGlobalStates():
 	states = []
+	#filename
+	states.append(os.path.basename(bpy.data.filepath))
 	#transform orientation
 	states.append(bpy.context.scene.transform_orientation_slots[0].type)
 	#get pivot
@@ -389,12 +394,16 @@ def draw_callback_px(self, context):
 			globalValues = getGlobalStats()
 			shiftY = 0
 			size = relativeScale(getValue('gFontSize'))
-			if getValue('bDrawGlobalPivot'):
-				text = globalStates[1]
+			if getValue('bDrawGlobalFlname'):
+				text = globalStates[0]
 				shiftY = relativeScale(getValue('gFontSize')) * 2.0
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'globalStatesColor', text, width, height, 'left')
+			if getValue('bDrawGlobalPivot'):
+				text = globalStates[2]
+				shiftY += relativeScale(getValue('gFontSize')) * 2.0
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'globalStatesColor', text, width, height, 'left')
 			if getValue('bDrawGlobalOrient'):
-				text = globalStates[0]
+				text = globalStates[1]
 				shiftY += relativeScale(getValue('gFontSize')) * 1.5
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'globalStatesColor', text, width, height, 'left')
 			if getValue('bDrawGlobalObjects'):
