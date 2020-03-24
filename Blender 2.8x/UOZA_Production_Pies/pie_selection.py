@@ -23,12 +23,12 @@ bl_info = {
     "name": "UOZA - Smart Selection Pie",
     "author": "Dogway, Wazou",
     "version": (1, 0, 0),
-    "blender": (2, 82, 0),
+    "blender": (2, 83, 0),
     "description": "Select Mode & Tools Pie Menu",
     "location": "View3D",
     "warning": "",
     "category": "3D View",
-    "wiki_url": "https://blenderartists.org/t/uoza-production-pies-for-blender-2-8x"
+    "wiki_url": "https://blenderartists.org/t/uoza-production-pies-2-0-for-blender-2-8x"
 }
 
 
@@ -82,7 +82,7 @@ class UOZA_MT_selection_object_mode(Menu):
         #6 - RIGHT
         pie.operator("uoza_selections.select_tools", text="Select Box", icon='STICKY_UVS_LOC').select_tools = 'select_box'
         #2 - BOTTOM
-        pie.operator("object.select_all", text="Invert Selection", icon='ZOOM_PREVIOUS').action = 'INVERT'
+        pie.operator("uoza.invert_selection", text="Invert Selection", icon='ZOOM_PREVIOUS')
         #8 - TOP
         pie.operator("uoza_selections.select_tools", text="Select", icon='RESTRICT_SELECT_OFF').select_tools = 'select'
         #7 - TOP - LEFT
