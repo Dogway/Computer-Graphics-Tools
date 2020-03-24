@@ -472,9 +472,9 @@ def draw_callback_px(self, context):
 					if bpy.context.scene.tool_settings.mesh_select_mode[2]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[2]), width, height, 'left')
 						shiftX += len(str(totalSelected[2])) * (relativeScale(getValue('sFontSize')) / 1.5)
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
 					else:
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[2]) + '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[2]) + ' /', width, height, 'left')
 						shiftX += len(str(totalSelected[2])) * (relativeScale(getValue('sFontSize')) / 1.5)
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[2]), width, height, 'left')
@@ -487,9 +487,9 @@ def draw_callback_px(self, context):
 					if bpy.context.scene.tool_settings.mesh_select_mode[1]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[1]), width, height, 'left')
 						shiftX += len(str(totalSelected[1])) * (relativeScale(getValue('sFontSize')) / 1.5)
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
 					else:
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[1]) + '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[1]) + ' /', width, height, 'left')
 						shiftX += len(str(totalSelected[1])) * (relativeScale(getValue('sFontSize')) / 1.5)
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[1]), width, height, 'left')
@@ -502,9 +502,9 @@ def draw_callback_px(self, context):
 					if bpy.context.scene.tool_settings.mesh_select_mode[0]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[0]), width, height, 'left')
 						shiftX += len(str(totalSelected[0])) * (relativeScale(getValue('sFontSize')) / 1.5)
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
 					else:
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[0]) + '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[0]) + ' /', width, height, 'left')
 						shiftX += len(str(totalSelected[0])) * (relativeScale(getValue('sFontSize')) / 1.5)
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[0]), width, height, 'left')
@@ -517,9 +517,9 @@ def draw_callback_px(self, context):
 					if bpy.context.scene.tool_settings.mesh_select_mode[2]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[3]), width, height, 'left')
 						shiftX += len(str(totalSelected[3])) * (relativeScale(getValue('sFontSize')) / 1.5)
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
 					else:
-						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[3]) + '/', width, height, 'left')
+						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalSelected[3]) + ' /', width, height, 'left')
 						shiftX += len(str(totalSelected[3])) * (relativeScale(getValue('sFontSize')) / 1.5)
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[3]), width, height, 'left')
