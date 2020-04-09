@@ -22,7 +22,7 @@
 bl_info = {
     "name": "UOZA - Smart Selection Pie",
     "author": "Dogway, Wazou",
-    "version": (1, 0, 0),
+    "version": (2, 1, 0),
     "blender": (2, 83, 0),
     "description": "Select Mode & Tools Pie Menu",
     "location": "View3D",
@@ -88,7 +88,7 @@ class UOZA_MT_selection_object_mode(Menu):
         #7 - TOP - LEFT
         pie.operator("view3d.zoom_border", text="Box Zoom", icon='STICKY_UVS_LOC')
         #9 - TOP - RIGHT
-        pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
+        pie.operator("uoza.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
         #1 - BOTTOM - LEFT
         localview = space.local_view is not None
         pie.operator("uoza.isolate", text="Isolate", icon='CAMERA_DATA', depress=localview)
@@ -113,7 +113,7 @@ class UOZA_MT_selection_object_mode(Menu):
         row = col.row(align=True)
         row.operator("object.select_grouped", text="Select Grouped", icon='GROUP_VERTEX')
         row = col.row(align=True)
-        row.operator("object.select_linked", text="Select Linked", icon='CONSTRAINT_BONE')
+        row.operator("object.select_linked", text="Select Linked", icon='LINKED')
 
 
 class UOZA_MT_selection_edit_mode(Menu):
@@ -146,13 +146,16 @@ class UOZA_MT_selection_edit_mode(Menu):
         pie.operator("uoza_selections.select_tools", text="Select", icon='RESTRICT_SELECT_OFF').select_tools = 'select'
         #7 - TOP - LEFT
         split = pie.split()
+
         col = split.column(align=True)
         row = col.row(align=True)
-        row.operator("mesh.loop_to_region", text="Select Loop Inner Region", icon='FACESEL')
+        row.operator("uoza.border_boundary", text="Select Loop Outer/Inner", icon='FACESEL')
         row = col.row(align=True)
-        row.operator("mesh.region_to_loop", text="Select Boundary Loop", icon='MESH_PLANE')
+        row.operator("uoza.select_border", text="Select Loop Border", icon='MESH_PLANE')
         row = col.row(align=True)
-        row.operator("uoza.select_border", text="Select Border Loop", icon='MESH_PLANE')
+        row.operator("mesh.select_linked", text="Select UV Island", icon='CLIPUV_DEHLT').delimit = {'SEAM'}
+        row = col.row(align=True)
+        row.operator("mesh.select_linked", text="Select Island", icon='DECORATE_LINKED').delimit = set()
         row = col.row(align=True)
         if ob_type is not "":
             row.operator(ob_type + ".select_nth", text="Select Checker", icon='PARTICLE_POINT')
@@ -176,7 +179,7 @@ class UOZA_MT_selection_edit_mode(Menu):
         gap.scale_y = 4
 
         #9 - TOP - RIGHT
-        pie.operator("uoza_pie_menus.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
+        pie.operator("uoza.view_selection", text="Focus In/Out", icon='VIS_SEL_10')
         #1 - BOTTOM - LEFT
         if not vis and "smart_select_loop" in dir(bpy.ops.mesh):
             pie.operator("mesh.smart_select_loop", text="Select Loop", icon='ZOOM_PREVIOUS')
