@@ -610,7 +610,7 @@ class WAZOU_PIE_MENUS_MT_origin_pivot(Menu):
         layout = self.layout
         pie = layout.menu_pie()
         # 4 - LEFT
-        pie.operator("object.origin_set", text="Origin To 3D Cursor", icon='PIVOT_CURSOR').type = 'ORIGIN_CURSOR'
+        pie.prop(context.scene.tool_settings, "use_transform_data_origin", text="O to Transform", icon='PIVOT_BOUNDBOX')
         # 6 - RIGHT
         pie.operator("view3d.snap_cursor_to_selected", text="Cursor to Selected", icon='PIVOT_CURSOR')
         # 2 - BOTTOM
@@ -621,11 +621,11 @@ class WAZOU_PIE_MENUS_MT_origin_pivot(Menu):
         row.operator("view3d.snap_selected_to_grid", text="Sel to Grid", icon='RESTRICT_SELECT_OFF')
         row = col.row(align=True)
         row.scale_y = 1.3
-        row.operator("view3d.snap_selected_to_cursor", text="Sel to Cursor (O)",icon='RESTRICT_SELECT_OFF').use_offset = True
+        row.operator("object.origin_set", text="Sel to Origin", icon='RESTRICT_SELECT_OFF').type = 'GEOMETRY_ORIGIN'
         # 8 - TOP
-        pie.operator("wazou_pie_menus.pivot_to_selection", text="Origin To Selection", icon='PIVOT_BOUNDBOX')
+        pie.operator("wazou_pie_menus.pivot_to_selection", text="O to Component", icon='PIVOT_BOUNDBOX')
         # 7 - TOP - LEFT
-        pie.operator("object.origin_set", text="Origin To Geometry", icon='PIVOT_BOUNDBOX').type = 'ORIGIN_GEOMETRY'
+        pie.operator("object.origin_set", text="O to Object", icon='PIVOT_BOUNDBOX').type = 'ORIGIN_GEOMETRY'
         # 9 - TOP - RIGHT
         pie.operator("view3d.snap_selected_to_cursor", text="Selection to Cursor", icon='RESTRICT_SELECT_OFF').use_offset = False
         # 1 - BOTTOM - LEFT
@@ -636,13 +636,13 @@ class WAZOU_PIE_MENUS_MT_origin_pivot(Menu):
         row.operator("object.origin_to_selected", text="O to Active", icon='PIVOT_BOUNDBOX')
         row = col.row(align=True)
         row.scale_y = 1.3
-        row.operator("wazou_pie_menus.pivot_to_bottom", text="O to Bottom", icon='PIVOT_BOUNDBOX')
+        row.operator("uoza.multi_to_bottom", text="O to Bottom", icon='PIVOT_BOUNDBOX')
         row = col.row(align=True)
         row.scale_y = 1.3
         row.operator("object.origin_set", text="O to Center of Mass", icon='PIVOT_BOUNDBOX').type = 'ORIGIN_CENTER_OF_MASS'
         row = col.row(align=True)
         row.scale_y = 1.3
-        row.operator("object.origin_set", text="Geometry To O", icon='PIVOT_BOUNDBOX').type = 'GEOMETRY_ORIGIN'
+        row.operator("object.origin_set", text="O to 3D Cursor", icon='PIVOT_BOUNDBOX').type = 'ORIGIN_CURSOR'
 
         # 3 - BOTTOM - RIGHT
         split = pie.split()
