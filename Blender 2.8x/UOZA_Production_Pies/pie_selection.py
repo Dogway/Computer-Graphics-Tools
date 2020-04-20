@@ -28,7 +28,7 @@ bl_info = {
     "location": "View3D",
     "warning": "",
     "category": "3D View",
-    "wiki_url": "https://blenderartists.org/t/uoza-production-pies-2-0-for-blender-2-8x"
+    "wiki_url": "https://blenderartists.org/t/uoza-productionpies-2-1-for-blender-2-83-lts"
 }
 
 
