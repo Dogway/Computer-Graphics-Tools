@@ -29,7 +29,7 @@ bl_info = {
 	"category": "3D View"
 }
 
-# For Selected Count, it heats CPU (10% load) and GPU, because the draw is running constantly.
+# For Selected Count, it heats CPU (10% load) and GPU, because the draw is running constantly (for Tris and Material)
 
 import os.path
 import bpy
