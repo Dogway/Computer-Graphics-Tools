@@ -46,7 +46,7 @@ objectName = ""
 totalComponents = [0, 0, 0, 0]
 totalSelected = [0, 0, 0, 0]
 names = ["Verts : ", "Edges : ", "Faces : ", "Tris : "]
-globalnames = ["Verts :", "Edges :", "Tris :", "Faces :", "Objects :", "Memory :", "Version :"]
+globalnames = ["Verts :", "Edges :", "Tris :", "Faces :", "Objects :", "Memory :", "Version :", "Engine :"]
 globalValues = [0, 0, 0, 0]
 globalStates = []
 
@@ -65,18 +65,21 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	sFontSize: bpy.props.IntProperty(name="Size", description="Font size", default=12)
 	gFontSize: bpy.props.IntProperty(name="Size", description="Font size", default=12)
 	mFontSize: bpy.props.IntProperty(name="Size", description="Font size", default=12)
+	fFontSize: bpy.props.IntProperty(name="Size", description="Font size", default=12)
 	#Color Properties
 	gStatColor: bpy.props.FloatVectorProperty(name="Stats", description="Global Color", default=(1.0, 1.0, 1.0), subtype='COLOR')
 	sStatColor: bpy.props.FloatVectorProperty(name="Stats", description="Selected Color", default=(1.0, 1.0, 1.0), subtype='COLOR')
 	highlightColor: bpy.props.FloatVectorProperty(name="Highlight", description="Highlight color", default=(0.0, 1.0, 0.0), subtype='COLOR')
 	shadowColor: bpy.props.FloatVectorProperty(name="Shadow", description="Shadow Color", default=(0.0, 0.0, 0.0), subtype='COLOR')
 	matColor: bpy.props.FloatVectorProperty(name="Material", description="Material Color", default=(0.5, 0.5, 0.5), subtype='COLOR')
+	nameColor: bpy.props.FloatVectorProperty(name="Filename", description="Filename Color", default=(1.0, 1.0, 1.0), subtype='COLOR')
 	globalStatesColor: bpy.props.FloatVectorProperty(name="States", description="State Color", default=(0.5, 0.5, 0.5), subtype='COLOR')
 	#Switches
 	bDispGlobal: bpy.props.BoolProperty(name="On/Off", description="On/Off switch", default=True)
 	bDrawGlobalVer: bpy.props.BoolProperty(name="Version", description="Switch for drawing Version", default=True)
+	bDrawGlobalEng: bpy.props.BoolProperty(name="Engine", description="Switch for drawing Engine", default=True)
 	bDrawGlobalMem: bpy.props.BoolProperty(name="Memory", description="Switch for drawing Memory", default=True)
-	bDrawGlobalFlname: bpy.props.BoolProperty(name="Filename", description="Switch for drawing File Name", default=True)
+	bDrawGlobalFlname: bpy.props.BoolProperty(name="Filename", description="Switch for drawing FileName", default=True)
 	bDrawGlobalVerts: bpy.props.BoolProperty(name="Verts", description="Switch for calculating vertices", default=True)
 	bDrawGlobalEdges: bpy.props.BoolProperty(name="Edges", description="Switch for calculating edges", default=True)
 	bDrawGlobalFaces: bpy.props.BoolProperty(name="Faces", description="Switch for calculating faces", default=True)
@@ -122,17 +125,21 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		#Box for additional properties
 		AddProp = layout.box()
 		AddProp.label(text="Additional Options")
+		NameRow = AddProp.row(align=True)
+		NameRow.label(text="Filename Options")
+		NameRow.prop(self, "fFontSize")
+		NameRow.prop(self, "nameColor")
 		MatRow = AddProp.row(align=True)
-		ShadowRow = AddProp.row(align=True)
 		MatRow.label(text="Material Options")
+		MatRow.prop(self, "mFontSize")
+		MatRow.prop(self, "matColor")
+		MatRow.prop(self, "groupNames")
+		ShadowRow = AddProp.row(align=True)
 		ShadowRow.label(text="Shadow Options")
 		ShadowRow.prop(self, "bDispShadow")
 		ShadowRow.prop(self, "shOffsetX")
 		ShadowRow.prop(self, "shOffsetY")
 		ShadowRow.prop(self, "shadowColor")
-		MatRow.prop(self, "mFontSize")
-		MatRow.prop(self, "matColor")
-		MatRow.prop(self, "groupNames")
 
 
 class AStats_Switches(bpy.types.Panel):
@@ -161,6 +168,7 @@ class AStats_Switches(bpy.types.Panel):
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalMem')
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalFlname')
 		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalVer')
+		globalBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawGlobalEng')
 		#selected box
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDispSelected', icon='FORCE_CHARGE')
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bShowMats')
@@ -224,7 +232,10 @@ def setDrawParams(fontName, xName, yName, shiftX, shiftY, colorName, text, width
 def getGlobalStates():
 	states = []
 	#filename
-	states.append(os.path.basename(bpy.data.filepath))
+	flnm = os.path.basename(bpy.data.filepath)
+	if flnm: flnm = flnm.rstrip(".blend")
+	else: flnm = ""
+	states.append(flnm)
 	#transform orientation
 	states.append(bpy.context.scene.transform_orientation_slots[0].type)
 	#get pivot
@@ -296,8 +307,14 @@ def getSelectionStats():
 def getGlobalStats():
 
 	bad_type = ["LATTICE", "CURVE", "FONT"]
-	stats = [0, 0, 0, 0, 0, 0, 0]
+	stats = [0, 0, 0, 0, 0, 0, 0, 0]
 	stats[4] = len(bpy.context.visible_objects)
+
+	engine = bpy.context.scene.render.engine
+	if engine == 'BLENDER_EEVEE': stats[7] = "Eevee"
+	elif engine == 'CYCLES': stats[7] = "Cycles"
+	else: stats[7] = "Workbench"
+
 	if bpy.context.mode == "OBJECT":
 		bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
 		stats[6] = bStat[7]
@@ -397,7 +414,7 @@ def draw_callback_px(self, context):
 			if getValue('bDrawGlobalFlname'):
 				text = globalStates[0]
 				shiftY = relativeScale(getValue('gFontSize')) * 2.0
-				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'globalStatesColor', '[' + text + ']' if text else text, width, height, 'left')
+				setDrawParams('fFontSize', 'gLocX', 'gLocY', 0, shiftY, 'nameColor', '[' + text + ']' if text else text, width, height, 'left')
 			if getValue('bDrawGlobalPivot'):
 				text = globalStates[2]
 				shiftY += relativeScale(getValue('gFontSize')) * 2.0
@@ -439,9 +456,15 @@ def draw_callback_px(self, context):
 			if getValue('bDrawGlobalVer'):
 				shiftY += relativeScale(getValue('gFontSize')) * 2.0
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'gStatColor', globalnames[6], width, height, 'left')
-				shiftX = len(globalnames[6]) * (relativeScale(getValue('gFontSize')) / 2)
+				shiftX = (len(globalnames[6])-1) * (relativeScale(getValue('gFontSize')) / 2)
 				shiftX += relativeScale(getValue('gFontSize')) / 1.5
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftY, 'gStatColor', str(globalValues[6]), width, height, 'left')
+			if getValue('bDrawGlobalEng'):
+				shiftY += relativeScale(getValue('gFontSize')) * 2.0
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'gStatColor', globalnames[7], width, height, 'left')
+				shiftX = len(globalnames[7]) * (relativeScale(getValue('gFontSize')) / 2)
+				shiftX += relativeScale(getValue('gFontSize')) / 1.5
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftY, 'gStatColor', str(globalValues[7]), width, height, 'left')
 
 		#Draw stats for selected objects
 		if getValue('bDispSelected') == True:
