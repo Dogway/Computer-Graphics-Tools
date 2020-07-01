@@ -45,8 +45,8 @@ font_id = 0
 objectName = ""
 totalComponents = [0, 0, 0, 0]
 totalSelected = [0, 0, 0, 0]
-names = ["Verts : ", "Edges : ", "Faces : ", "Tris : "]
-globalnames = ["Verts :", "Edges :", "Tris :", "Faces :", "Objects :", "Memory :", "Version :", "Engine :"]
+names = ["Verts : ", "Edges : ", "Faces : ", "Tris : ", "Subd : ", "Dim : "]
+globalnames = ["Verts :", "Edges :", "Tris :", "Faces :", "Objects :", "Memory :", "Version :", "Engine :", "Subdivisions : ", "Dimensions : "]
 globalValues = [0, 0, 0, 0]
 globalStates = []
 
@@ -96,6 +96,8 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	bDrawEdges: bpy.props.BoolProperty(name="Edges", description="Switch for drawing edges", default=True)
 	bDrawVerts: bpy.props.BoolProperty(name="Verts", description="Switch for drawing verts", default=True)
 	bDrawTris: bpy.props.BoolProperty(name="Tris", description="Switch for calculating triangles", default=True)
+	bDrawSubd: bpy.props.BoolProperty(name="Subd", description="Switch for calculating Subdivision Level", default=True)
+	bDrawSubd: bpy.props.BoolProperty(name="Dim", description="Switch for calculating Object Dimensions", default=True)
 	#Additional Properties
 	groupNames: bpy.props.IntProperty(name="Group names after", description="When the number of of selected object is bigger than the value it will be replaced by Number of Objects", default=2)
 
@@ -176,6 +178,8 @@ class AStats_Switches(bpy.types.Panel):
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawEdges')
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawVerts')
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawTris')
+		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawSubd')
+		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDrawDim')
 		selectedBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bDispActive', icon='LAYER_ACTIVE')
 		#additional box
 		addBox.prop(bpy.context.preferences.addons[__name__].preferences, 'bNameGrouping')
@@ -277,8 +281,19 @@ def getSelectionStats():
 	faces = 0
 	edges = 0
 	verts = 0
+	subd = "0 / 0"
+	dim = " 1.0 / 1.0 / 1.0"
 	bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
 	modes = ["EDIT_LATTICE", "EDIT_CURVE", "EDIT_TEXT"]
+
+	for modifier in bpy.context.active_object.modifiers:
+		if modifier.type == "SUBSURF":
+			mod = bpy.data.objects[str(bpy.context.active_object.name)].modifiers['Subdivision']
+			subd = str(mod.levels) + " / " + str(mod.render_levels)
+
+	dim = bpy.context.active_object.dimensions
+	dimXYZ = str(round(dim[0], 1))  + " / " +  str(round(dim[1], 1))  + " / " +  str(round(dim[2], 1))
+
 	if bpy.context.mode in modes:
 		verts = bStat[1].split(':')[1].split("/")[0]
 	else:
@@ -301,7 +316,7 @@ def getSelectionStats():
 					for obj in bpy.context.selected_objects:
 						if obj.type == "MESH" and bpy.context.mode == "EDIT_MESH":
 							tris += getTriCount(obj)
-	return [verts, edges, faces, tris]
+	return [verts, edges, faces, tris, subd, dimXYZ]
 
 
 def getGlobalStats():
@@ -415,7 +430,7 @@ def draw_callback_px(self, context):
 				saved = '*' if bpy.data.is_dirty else ''
 				text = globalStates[0]
 				shiftY = relativeScale(getValue('gFontSize')) * 2.0
-				setDrawParams('fFontSize', 'gLocX', 'gLocY', 0, shiftY, 'nameColor', '[' saved + text + ']' if text else text, width, height, 'left')
+				setDrawParams('fFontSize', 'gLocX', 'gLocY', 0, shiftY, 'nameColor', '[' + saved + text + ']' if text else text, width, height, 'left')
 			if getValue('bDrawGlobalPivot'):
 				text = globalStates[2]
 				shiftY += relativeScale(getValue('gFontSize')) * 2.0
@@ -461,11 +476,12 @@ def draw_callback_px(self, context):
 				shiftX += relativeScale(getValue('gFontSize')) / 1.5
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftY, 'gStatColor', str(globalValues[6]), width, height, 'left')
 			if getValue('bDrawGlobalEng'):
-				shiftY += relativeScale(getValue('gFontSize')) * 2.0
-				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftY, 'gStatColor', globalnames[7], width, height, 'left')
-				shiftX = len(globalnames[7]) * (relativeScale(getValue('gFontSize')) / 2)
-				shiftX += relativeScale(getValue('gFontSize')) / 1.5
-				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftY, 'gStatColor', str(globalValues[7]), width, height, 'left')
+				shiftYL = shiftY + relativeScale(getValue('gFontSize')) * 2.0
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftYL, 'gStatColor', globalnames[7], width, height, 'left')
+				shiftXL = shiftX + (len(globalnames[7]) * (relativeScale(getValue('gFontSize')) / 2))
+				shiftXL += relativeScale(getValue('gFontSize')) / 1.5
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftYL, 'gStatColor', str(globalValues[7]), width, height, 'left')
+
 
 		#Draw stats for selected objects
 		if getValue('bDispSelected') == True:
@@ -547,6 +563,20 @@ def draw_callback_px(self, context):
 						shiftX += len(str(totalSelected[3])) * (relativeScale(getValue('sFontSize')) / 1.5)
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[3]), width, height, 'left')
+			#subd
+			if getValue('bDrawSubd'):
+				shiftYL += relativeScale(getValue('gFontSize')) * 2.0
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftYL, 'gStatColor', "Subd : ", width, height, 'left')
+				shiftXL += len(str(totalSelected[4])) * (relativeScale(getValue('gFontSize')) / 2)
+				shiftXL += relativeScale(getValue('gFontSize')) / 1.5
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftYL, 'gStatColor', str(totalSelected[4]), width, height, 'left')
+			#dimensions
+			if getValue('bDrawSubd'):
+				shiftYL += relativeScale(getValue('gFontSize')) * 2.0
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftYL, 'gStatColor', "Dim (cm): ", width, height, 'left')
+				shiftXL += len(str(totalSelected[5])) * (relativeScale(getValue('gFontSize')) / 2)
+				shiftXL += relativeScale(getValue('gFontSize')) / 1.5
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftYL, 'gStatColor', str(totalSelected[5]), width, height, 'left')
 
 
 def register():
