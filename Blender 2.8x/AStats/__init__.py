@@ -412,9 +412,10 @@ def draw_callback_px(self, context):
 			shiftY = 0
 			size = relativeScale(getValue('gFontSize'))
 			if getValue('bDrawGlobalFlname'):
+				saved = '*' if bpy.data.is_dirty else ''
 				text = globalStates[0]
 				shiftY = relativeScale(getValue('gFontSize')) * 2.0
-				setDrawParams('fFontSize', 'gLocX', 'gLocY', 0, shiftY, 'nameColor', '[' + text + ']' if text else text, width, height, 'left')
+				setDrawParams('fFontSize', 'gLocX', 'gLocY', 0, shiftY, 'nameColor', '[' saved + text + ']' if text else text, width, height, 'left')
 			if getValue('bDrawGlobalPivot'):
 				text = globalStates[2]
 				shiftY += relativeScale(getValue('gFontSize')) * 2.0
