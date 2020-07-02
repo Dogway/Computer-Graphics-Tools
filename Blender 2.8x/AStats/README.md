@@ -7,3 +7,6 @@ I rearranged and aligned the overlay to make it more structured. Beautified the 
 You can check the Diff in the [commits](https://github.com/Dogway/Computer-Graphics-Tools/commits/master)
 
 ![](https://raw.githubusercontent.com/Dogway/Computer-Graphics-Tools/master/Blender%202.8x/AStats/Overlay.png)
+
+
+Remember you can tweak it to your like (which stats are visible, color, size...)
