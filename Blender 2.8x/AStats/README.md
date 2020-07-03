@@ -9,4 +9,4 @@ You can check the Diff in the [commits](https://github.com/Dogway/Computer-Graph
 ![](https://github.com/Dogway/Computer-Graphics-Tools/blob/master/Blender%202.8x/AStats/Overlay.png?raw=true)
 
 
-Remember you can tweak it to your like (which stats are visible, color, size...)
+Remember you can tweak it to your preferences (which stats are visible, color, size...)
