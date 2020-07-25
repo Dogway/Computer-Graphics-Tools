@@ -22,8 +22,8 @@ bl_info = {
 	"name": "A* Statistics",
 	"description": "Show Stats in Viewport",
 	"author": "A*, Zuorion, Dogway",
-	"version": (0, 0, 5),
-	"blender": (2, 83, 0),
+	"version": (1, 0, 0),
+	"blender": (2, 83, 3),
 	"location": "View3D",
 	"wiki_url": "https://youtu.be/6Ra_2eng3XE",
 	"category": "3D View"
@@ -97,7 +97,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	bDrawVerts: bpy.props.BoolProperty(name="Verts", description="Switch for drawing verts", default=True)
 	bDrawTris: bpy.props.BoolProperty(name="Tris", description="Switch for calculating triangles", default=True)
 	bDrawSubd: bpy.props.BoolProperty(name="Subd", description="Switch for calculating Subdivision Level", default=True)
-	bDrawSubd: bpy.props.BoolProperty(name="Dim", description="Switch for calculating Object Dimensions", default=True)
+	bDrawDim: bpy.props.BoolProperty(name="Dim", description="Switch for calculating Object Dimensions", default=True)
 	#Additional Properties
 	groupNames: bpy.props.IntProperty(name="Group names after", description="When the number of of selected object is bigger than the value it will be replaced by Number of Objects", default=2)
 
@@ -252,71 +252,85 @@ def getGlobalStates():
 
 
 def getTriCount(object):
-	tris = 0
-	notSelected = []
-	object.update_from_editmode()
-	for poly in object.data.polygons:
-		if poly.select:
-			tris += 1 + (poly.loop_total - 3)
-	return tris
+	if getValue('bDispSelected') == True:
+		tris = 0
+		notSelected = []
+		object.update_from_editmode()
+		for poly in object.data.polygons:
+			if poly.select:
+				tris += 1 + (poly.loop_total - 3)
+		return tris
 
 
 def getDataFromSelectedObjects():
-	sum = [0, 0, 0, 0]
-	for obj in bpy.context.selected_objects:
-		if obj.type == "MESH":
-			data = obj.data
-			bm = bmesh.new()
-			bm.from_mesh(obj.data)
-			sum[3] += len(bm.calc_loop_triangles())
-			bmesh.types.BMesh.free
-			sum[2] += len(data.polygons)
-			sum[1] += len(data.edges)
-			sum[0] += len(data.vertices)
-	return sum
+	if getValue('bDispSelected') == True:
+		sum = [0, 0, 0, 0]
+		for obj in bpy.context.selected_objects:
+			if obj.type == "MESH":
+				data = obj.data
+				bm = bmesh.new()
+				bm.from_mesh(obj.data)
+				sum[3] += len(bm.calc_loop_triangles())
+				bmesh.types.BMesh.free
+				sum[2] += len(data.polygons)
+				sum[1] += len(data.edges)
+				sum[0] += len(data.vertices)
+		return sum
 
 
 def getSelectionStats():
-	tris = 0
-	faces = 0
-	edges = 0
-	verts = 0
-	subd = "0 / 0"
-	dim = " 1.0 / 1.0 / 1.0"
-	bStat = bpy.context.scene.statistics(bpy.context.view_layer).split("|")
-	modes = ["EDIT_LATTICE", "EDIT_CURVE", "EDIT_TEXT"]
 
-	for modifier in bpy.context.active_object.modifiers:
-		if modifier.type == "SUBSURF":
-			mod = bpy.data.objects[str(bpy.context.active_object.name)].modifiers['Subdivision']
-			subd = str(mod.levels) + " / " + str(mod.render_levels)
+	if getValue('bDispSelected') == True:
+		tris = 0
+		faces = 0
+		edges = 0
+		verts = 0
+		subd = "0 / 0"
+		dim = " 1.0 / 1.0 / 1.0"
+		scene = bpy.context.scene
+		bStat = scene.statistics(bpy.context.view_layer).split("|")
+		modes = ["EDIT_LATTICE", "EDIT_CURVE", "EDIT_TEXT"]
 
-	dim = bpy.context.active_object.dimensions
-	dimXYZ = str(round(dim[0], 1))  + " / " +  str(round(dim[1], 1))  + " / " +  str(round(dim[2], 1))
+		unit_settings = str(scene.unit_settings.length_unit)
+		unit =  0.01    if unit_settings == "CENTIMETERS" else \
+				0.0254  if unit_settings == "INCHES"      else \
+				0.3048  if unit_settings == "FEET"        else \
+				1.0     if unit_settings == "METERS"      else \
+				1000.0  if unit_settings == "KILOMETERS"  else \
+				1609.34 if unit_settings == "MILES"       else 0.001
 
-	if bpy.context.mode in modes:
-		verts = bStat[1].split(':')[1].split("/")[0]
-	else:
-		if bpy.context.scene.tool_settings.mesh_select_mode[0] == True:
-			if bpy.context.mode == "EDIT_MESH":
-				verts = bStat[1].split(':')[1].split("/")[0]
-				edges = bStat[2].split(':')[1].split("/")[0]
-				faces = bStat[3].split(':')[1].split("/")[0]
-		if bpy.context.scene.tool_settings.mesh_select_mode[1] == True:
-			if bpy.context.mode == "EDIT_MESH":
-				verts = bStat[1].split(':')[1].split("/")[0]
-				edges = bStat[2].split(':')[1].split("/")[0]
-				faces = bStat[3].split(':')[1].split("/")[0]
-		if bpy.context.scene.tool_settings.mesh_select_mode[2] == True:
-			if bpy.context.mode == "EDIT_MESH":
-				verts = bStat[1].split(':')[1].split("/")[0]
-				edges = bStat[2].split(':')[1].split("/")[0]
-				faces = bStat[3].split(':')[1].split("/")[0]
-				if getValue('bDrawTris'):
-					for obj in bpy.context.selected_objects:
-						if obj.type == "MESH" and bpy.context.mode == "EDIT_MESH":
-							tris += getTriCount(obj)
-	return [verts, edges, faces, tris, subd, dimXYZ]
+		for modifier in bpy.context.active_object.modifiers:
+			if modifier.type == "SUBSURF":
+				mod = bpy.data.objects[str(bpy.context.active_object.name)].modifiers['Subdivision']
+				subd = str(mod.levels) + " / " + str(mod.render_levels)
+
+		dim = bpy.context.active_object.dimensions
+		dim_scale = scene.unit_settings.scale_length
+		dimXYZ = str(round(dim[0] / unit * dim_scale, 2))  + " / " +  str(round(dim[1] / unit * dim_scale, 2))  + " / " +  str(round(dim[2] / unit * dim_scale, 2))
+
+		if bpy.context.mode in modes:
+			verts = bStat[1].split(':')[1].split("/")[0]
+		else:
+			if bpy.context.scene.tool_settings.mesh_select_mode[0] == True:
+				if bpy.context.mode == "EDIT_MESH":
+					verts = bStat[1].split(':')[1].split("/")[0]
+					edges = bStat[2].split(':')[1].split("/")[0]
+					faces = bStat[3].split(':')[1].split("/")[0]
+			if bpy.context.scene.tool_settings.mesh_select_mode[1] == True:
+				if bpy.context.mode == "EDIT_MESH":
+					verts = bStat[1].split(':')[1].split("/")[0]
+					edges = bStat[2].split(':')[1].split("/")[0]
+					faces = bStat[3].split(':')[1].split("/")[0]
+			if bpy.context.scene.tool_settings.mesh_select_mode[2] == True:
+				if bpy.context.mode == "EDIT_MESH":
+					verts = bStat[1].split(':')[1].split("/")[0]
+					edges = bStat[2].split(':')[1].split("/")[0]
+					faces = bStat[3].split(':')[1].split("/")[0]
+					if getValue('bDrawTris'):
+						for obj in bpy.context.selected_objects:
+							if obj.type == "MESH" and bpy.context.mode == "EDIT_MESH":
+								tris += getTriCount(obj)
+		return [verts, edges, faces, tris, subd, dimXYZ]
 
 
 def getGlobalStats():
@@ -360,35 +374,36 @@ def getGlobalStats():
 
 
 def getMaterialsFromSelection():
-	mats = []
-	text = ''
-	for obj in bpy.context.selected_objects:
-		if obj.type == "MESH":
-			obj.update_from_editmode()
-			data = obj.data
-			if bpy.context.mode == "EDIT_MESH":
-				if len(data.materials) > 0:
-					for polygon in data.polygons:
-						material = data.materials[polygon.material_index]
-						if polygon.select:
-							if material != None:
-								if material.name not in mats:
-									mats.append(material.name)
-			else:
-				for material in data.materials:
-					if material != None:
-						mats.append(material.name)
-	if len(mats) > getValue("groupNames") and getValue('bNameGrouping') == True:
-		text = str(len(mats)) + " Materials"
-	else:
-		for index in range(0, len(mats)):
-			if index == 0:
-				text += str(mats[index])
-			elif index == (len(mats)):
-				text += ', ' + str(mats[index])
-			else:
-				text += ', ' + str(mats[index])
-	return text
+	if getValue('bDispSelected') == True:
+		mats = []
+		text = ''
+		for obj in bpy.context.selected_objects:
+			if obj.type == "MESH":
+				obj.update_from_editmode()
+				data = obj.data
+				if bpy.context.mode == "EDIT_MESH":
+					if len(data.materials) > 0:
+						for polygon in data.polygons:
+							material = data.materials[polygon.material_index]
+							if polygon.select:
+								if material != None:
+									if material.name not in mats:
+										mats.append(material.name)
+				else:
+					for material in data.materials:
+						if material != None:
+							mats.append(material.name)
+		if len(mats) > getValue("groupNames") and getValue('bNameGrouping') == True:
+			text = str(len(mats)) + " Materials"
+		else:
+			for index in range(0, len(mats)):
+				if index == 0:
+					text += str(mats[index])
+				elif index == (len(mats)):
+					text += ', ' + str(mats[index])
+				else:
+					text += ', ' + str(mats[index])
+		return text
 
 
 def displayShadow():
@@ -485,6 +500,7 @@ def draw_callback_px(self, context):
 
 		#Draw stats for selected objects
 		if getValue('bDispSelected') == True:
+			scene = bpy.context.scene
 			totalComponents = getDataFromSelectedObjects()
 			totalSelected = getSelectionStats()
 			objectName = getObjectNames()
@@ -504,12 +520,12 @@ def draw_callback_px(self, context):
 					shiftX_m = int(((len(objectName)) * (relativeScale(getValue('gFontSize')))) / 1.5)
 					setDrawParams('mFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX_m, shiftY, 'matColor', "(" + getMaterialsFromSelection() + ")", width, height, 'left')
 			#faces
-			if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[2] and getValue('bDrawFaces')) or (not getValue('bDispActive') and getValue('bDrawFaces')):
+			if (getValue('bDispActive') and scene.tool_settings.mesh_select_mode[2] and getValue('bDrawFaces')) or (not getValue('bDispActive') and getValue('bDrawFaces')):
 				shiftY += relativeScale(getValue('sFontSize')) * 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b, shiftY, 'sStatColor', names[2], width, height, 'left')
 				shiftX = len(names[0]) * (relativeScale(getValue('sFontSize')) / 2)
 				if bpy.context.mode == "EDIT_MESH":
-					if bpy.context.scene.tool_settings.mesh_select_mode[2]:
+					if scene.tool_settings.mesh_select_mode[2]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[2]), width, height, 'left')
 						shiftX += len(str(totalSelected[2])) * (relativeScale(getValue('sFontSize')) / 1.5)
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
@@ -519,12 +535,12 @@ def draw_callback_px(self, context):
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[2]), width, height, 'left')
 			#edges
-			if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[1] and getValue('bDrawEdges')) or (not getValue('bDispActive') and getValue('bDrawEdges')):
+			if (getValue('bDispActive') and scene.tool_settings.mesh_select_mode[1] and getValue('bDrawEdges')) or (not getValue('bDispActive') and getValue('bDrawEdges')):
 				shiftY += relativeScale(getValue('sFontSize')) * 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b, shiftY, 'sStatColor', names[1], width, height, 'left')
 				shiftX = len(names[1]) * (relativeScale(getValue('sFontSize')) / 2)
 				if bpy.context.mode == "EDIT_MESH":
-					if bpy.context.scene.tool_settings.mesh_select_mode[1]:
+					if scene.tool_settings.mesh_select_mode[1]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[1]), width, height, 'left')
 						shiftX += len(str(totalSelected[1])) * (relativeScale(getValue('sFontSize')) / 1.5)
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
@@ -534,12 +550,12 @@ def draw_callback_px(self, context):
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[1]), width, height, 'left')
 			#verts
-			if (getValue('bDispActive') and bpy.context.scene.tool_settings.mesh_select_mode[0] and getValue('bDrawVerts')) or (not getValue('bDispActive') and getValue('bDrawVerts')):
+			if (getValue('bDispActive') and scene.tool_settings.mesh_select_mode[0] and getValue('bDrawVerts')) or (not getValue('bDispActive') and getValue('bDrawVerts')):
 				shiftY += relativeScale(getValue('sFontSize')) * 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b, shiftY, 'sStatColor', names[0], width, height, 'left')
 				shiftX = len(names[0]) * (relativeScale(getValue('sFontSize')) / 2)
 				if bpy.context.mode == "EDIT_MESH" or bpy.context.mode in ["EDIT_LATTICE", "EDIT_CURVE", "EDIT_TEXT"]:
-					if bpy.context.scene.tool_settings.mesh_select_mode[0]:
+					if scene.tool_settings.mesh_select_mode[0]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[0]), width, height, 'left')
 						shiftX += len(str(totalSelected[0])) * (relativeScale(getValue('sFontSize')) / 1.5)
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
@@ -549,12 +565,12 @@ def draw_callback_px(self, context):
 				shiftX += relativeScale(getValue('sFontSize')) / 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', str(totalComponents[0]), width, height, 'left')
 			#tris
-			if ((getValue('bDispActive')) and bpy.context.scene.tool_settings.mesh_select_mode[2] and getValue('bDrawTris')) or (not getValue('bDispActive') and getValue('bDrawTris')):
+			if ((getValue('bDispActive')) and scene.tool_settings.mesh_select_mode[2] and getValue('bDrawTris')) or (not getValue('bDispActive') and getValue('bDrawTris')):
 				shiftY += relativeScale(getValue('sFontSize')) * 1.5
 				setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b, shiftY, 'sStatColor', names[3], width, height, 'left')
 				shiftX = len(names[0]) * (relativeScale(getValue('sFontSize')) / 2)
 				if bpy.context.mode == "EDIT_MESH":
-					if bpy.context.scene.tool_settings.mesh_select_mode[2]:
+					if scene.tool_settings.mesh_select_mode[2]:
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'highlightColor', str(totalSelected[3]), width, height, 'left')
 						shiftX += len(str(totalSelected[3])) * (relativeScale(getValue('sFontSize')) / 1.5)
 						setDrawParams('sFontSize', 'sLocX', 'sLocY', shiftX_b + shiftX, shiftY, 'sStatColor', ' /', width, height, 'left')
@@ -571,9 +587,16 @@ def draw_callback_px(self, context):
 				shiftXL += relativeScale(getValue('gFontSize')) / 1.5
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftYL, 'gStatColor', str(totalSelected[4]), width, height, 'left')
 			#dimensions
-			if getValue('bDrawSubd'):
+			if getValue('bDrawDim'):
+				unit_settings = str(scene.unit_settings.length_unit)
+				unit =  " (cm): " if unit_settings == "CENTIMETERS" else \
+						" (in): " if unit_settings == "INCHES"      else \
+						" (ft): " if unit_settings == "FEET"        else \
+						" (m) : " if unit_settings == "METERS"      else \
+						" (km): " if unit_settings == "KILOMETERS"  else \
+						" (ml): " if unit_settings == "MILES"       else " (mm): "
 				shiftYL += relativeScale(getValue('gFontSize')) * 2.0
-				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftYL, 'gStatColor', "Dim (cm): ", width, height, 'left')
+				setDrawParams('gFontSize', 'gLocX', 'gLocY', 0, shiftYL, 'gStatColor', "Dim" + unit, width, height, 'left')
 				shiftXL += len(str(totalSelected[5])) * (relativeScale(getValue('gFontSize')) / 2)
 				shiftXL += relativeScale(getValue('gFontSize')) / 1.5
 				setDrawParams('gFontSize', 'gLocX', 'gLocY', shiftX, shiftYL, 'gStatColor', str(totalSelected[5]), width, height, 'left')
