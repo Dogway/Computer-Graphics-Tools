@@ -23,7 +23,7 @@ bl_info = {
 	"description": "Show Stats in Viewport",
 	"author": "A*, Zuorion, Dogway",
 	"version": (1, 0, 0),
-	"blender": (2, 83, 3),
+	"blender": (2, 90, 0),
 	"location": "View3D",
 	"wiki_url": "https://youtu.be/6Ra_2eng3XE",
 	"category": "3D View"
@@ -75,6 +75,7 @@ class AddonPreferences(bpy.types.AddonPreferences):
 	nameColor: bpy.props.FloatVectorProperty(name="Filename", description="Filename Color", default=(1.0, 1.0, 1.0), subtype='COLOR')
 	globalStatesColor: bpy.props.FloatVectorProperty(name="States", description="State Color", default=(0.5, 0.5, 0.5), subtype='COLOR')
 	#Switches
+	sPolyCount: bpy.props.IntProperty(name="PolyCount Max", description="PolyCount Max", default=150000)
 	bDispGlobal: bpy.props.BoolProperty(name="On/Off", description="On/Off switch", default=True)
 	bDrawGlobalVer: bpy.props.BoolProperty(name="Version", description="Switch for drawing Version", default=True)
 	bDrawGlobalEng: bpy.props.BoolProperty(name="Engine", description="Switch for drawing Engine", default=True)
@@ -123,6 +124,8 @@ class AddonPreferences(bpy.types.AddonPreferences):
 		SRow.prop(self, "sLocY")
 		SRow.prop(self, 'sStatColor')
 		SRow.prop(self, "highlightColor")
+		SRow = SelectedStatBox.row(align=True)
+		SRow.prop(self, 'sPolyCount')
 		SelectedStatBox.label(text="Statistics for all selected objects")
 		#Box for additional properties
 		AddProp = layout.box()
@@ -252,6 +255,7 @@ def getGlobalStates():
 
 
 def getTriCount(object):
+
 	if getValue('bDispSelected') == True:
 		tris = 0
 		notSelected = []
@@ -263,6 +267,7 @@ def getTriCount(object):
 
 
 def getDataFromSelectedObjects():
+
 	if getValue('bDispSelected') == True:
 		sum = [0, 0, 0, 0]
 		for obj in bpy.context.selected_objects:
@@ -374,6 +379,7 @@ def getGlobalStats():
 
 
 def getMaterialsFromSelection():
+
 	if getValue('bDispSelected') == True:
 		mats = []
 		text = ''
@@ -499,7 +505,10 @@ def draw_callback_px(self, context):
 
 
 		#Draw stats for selected objects
-		if getValue('bDispSelected') == True:
+		globalValues = getGlobalStats()
+		globalPolyCount = int(globalValues[3].replace(",", ""))
+
+		if getValue('bDispSelected') == True and globalPolyCount < getValue('sPolyCount'):
 			scene = bpy.context.scene
 			totalComponents = getDataFromSelectedObjects()
 			totalSelected = getSelectionStats()
