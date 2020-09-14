@@ -506,7 +506,7 @@ def draw_callback_px(self, context):
 
 		#Draw stats for selected objects
 		globalValues = getGlobalStats()
-		globalPolyCount = int(globalValues[3].replace(",", ""))
+		globalPolyCount = int(str(globalValues[3]).replace(",", ""))
 
 		if getValue('bDispSelected') == True and globalPolyCount < getValue('sPolyCount'):
 			scene = bpy.context.scene
